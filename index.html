@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conferência de Orçamentos</title>
+  <style>
+:root {
+  --tinta: #17262e;
+  --tinta-2: #22373f;
+  --papel: #f2f4f2;
+  --cartao: #ffffff;
+  --linha: #dbe1dd;
+  --texto: #1c2b31;
+  --texto-suave: #5d6e72;
+  --acento: #0c7a76;
+  --acento-escuro: #095f5c;
+  --pendente: #b87a0b;
+  --pendente-fundo: #fbf1da;
+  --conferido: #2b7a4b;
+  --conferido-fundo: #def2e5;
+  --folga: #6b7478;
+  --folga-fundo: #e7eaea;
+  --erro: #b3372c;
+  --raio: 6px;
+  --fonte: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --papel: #12191c; --cartao: #1a2428; --linha: #2c3a3f; --texto: #e6edec;
+    --texto-suave: #98a9ad; --acento: #3bb5af; --acento-escuro: #5cc9c3;
+    --pendente: #e0a63a; --pendente-fundo: #3a2e12;
+    --conferido: #5fc287; --conferido-fundo: #16341f;
+    --folga: #9aa5a8; --folga-fundo: #263135; --erro: #ef7a6e;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; font-family: var(--fonte); font-size: 15px; line-height: 1.5;
+  color: var(--texto); background: var(--papel); display: flex;
+}
+h1, h2, h3 { margin: 0; line-height: 1.25; }
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+/* Lateral */
+.lateral {
+  width: 232px; flex: none; background: var(--tinta); color: #dce6e4;
+  display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+}
+.marca { padding: 22px 20px 18px; border-bottom: 1px solid #ffffff1c; }
+.marca-sigla { display: block; font-size: 22px; font-weight: 700; letter-spacing: .02em; color: #fff; }
+.marca-nome { display: block; font-size: 13px; color: #9fb4b1; margin-top: 2px; }
+.menu { padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.menu a {
+  color: #c4d3d0; text-decoration: none; padding: 10px 12px; border-radius: var(--raio);
+  border-left: 3px solid transparent; font-size: 15px;
+}
+.menu a:hover { background: #ffffff10; color: #fff; }
+.menu a.ativo { background: #ffffff16; color: #fff; border-left-color: #4fd1c9; font-weight: 600; }
+.lateral-rodape { padding: 14px 20px; font-size: 12.5px; color: #9fb4b1; border-top: 1px solid #ffffff1c; }
+.lateral-rodape::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: #7d8c8a; margin-right: 8px;
+}
+.lateral-rodape.on::before { background: #52d28c; }
+.lateral-rodape.off::before { background: #ef7a6e; }
+
+/* Conteúdo */
+.conteudo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topo {
+  display: flex; align-items: center; gap: 14px; padding: 18px 32px;
+  background: var(--cartao); border-bottom: 1px solid var(--linha);
+}
+.topo h1 { font-size: 22px; font-weight: 650; }
+.btn-menu { display: none; }
+main { padding: 28px 32px 48px; max-width: 1280px; width: 100%; outline: none; }
+
+/* Componentes */
+.barra { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 22px; }
+.barra .espaco { flex: 1; }
+select, input[type=text], input[type=number] {
+  font: inherit; color: var(--texto); background: var(--cartao);
+  border: 1px solid var(--linha); border-radius: var(--raio); padding: 8px 10px; min-height: 38px;
+}
+button, .btn {
+  font: inherit; font-weight: 600; cursor: pointer; border-radius: var(--raio);
+  border: 1px solid var(--acento); background: var(--acento); color: #fff;
+  padding: 8px 16px; min-height: 38px;
+}
+button:hover { background: var(--acento-escuro); }
+button.sec { background: transparent; color: var(--acento); }
+button.sec:hover { background: var(--folga-fundo); }
+
+.resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 26px; }
+.indicador { background: var(--cartao); border: 1px solid var(--linha); border-radius: var(--raio); padding: 16px 18px; }
+.indicador .valor { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.indicador .rotulo { color: var(--texto-suave); font-size: 14px; }
+.indicador.ok .valor { color: var(--conferido); }
+.indicador.alerta .valor { color: var(--erro); }
+
+.painel { background: var(--cartao); border: 1px solid var(--linha); border-radius: var(--raio); }
+.painel-titulo { padding: 14px 18px; border-bottom: 1px solid var(--linha); font-weight: 650; display: flex; justify-content: space-between; gap: 12px; }
+.painel-titulo small { font-weight: 400; color: var(--texto-suave); }
+
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 11px 18px; border-bottom: 1px solid var(--linha); }
+th { font-size: 13px; color: var(--texto-suave); font-weight: 600; background: color-mix(in srgb, var(--papel) 60%, var(--cartao)); }
+td.num, th.num { text-align: right; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: color-mix(in srgb, var(--acento) 6%, transparent); }
+td a { color: var(--acento); font-weight: 600; text-decoration: none; }
+td a:hover { text-decoration: underline; }
+.zero { color: var(--texto-suave); }
+.selo { display: inline-block; padding: 1px 9px; border-radius: 99px; font-size: 13px; font-weight: 600; background: var(--folga-fundo); color: var(--folga); }
+.selo.erro { background: #f7dcd8; color: var(--erro); }
+
+.vazio { padding: 46px 24px; text-align: center; color: var(--texto-suave); }
+.vazio strong { display: block; color: var(--texto); font-size: 17px; margin-bottom: 6px; }
+.etapa-info { max-width: 620px; margin: 40px auto; }
+.etapa-info ul { color: var(--texto-suave); padding-left: 20px; }
+
+.avisos { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 50; }
+.aviso { background: var(--tinta); color: #fff; padding: 11px 16px; border-radius: var(--raio); box-shadow: 0 4px 14px #0004; max-width: 360px; }
+.aviso.erro { background: var(--erro); }
+
+/* Responsivo */
+@media (max-width: 860px) {
+  body { display: block; }
+  .lateral { position: fixed; z-index: 40; left: 0; transform: translateX(-100%); transition: transform .18s; }
+  .lateral.aberta { transform: none; }
+  .btn-menu { display: inline-block; padding: 6px 12px; min-height: 34px; }
+  .topo, main { padding-left: 16px; padding-right: 16px; }
+  th, td { padding: 10px 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .lateral { transition: none; } }
+
+/* Etapa 2: calendário de conferências */
+.indicador.pend .valor { color: var(--pendente); }
+.suave { color: var(--texto-suave); margin: 2px 0 0; font-size: 14px; }
+.calendario { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; padding: 14px 18px 18px; }
+.cab-dia { font-size: 13px; font-weight: 600; color: var(--texto-suave); text-align: center; padding-bottom: 2px; }
+.dia {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 2px;
+  min-height: 78px; padding: 8px 9px; text-align: left; font-weight: 400;
+  background: var(--pendente-fundo); color: var(--texto); border: 1px solid var(--linha); border-radius: var(--raio);
+}
+.dia:hover { background: var(--pendente-fundo); filter: brightness(.96); }
+.dia.fora { visibility: hidden; border: 0; min-height: 0; }
+.dia-num { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+.dia-info { font-size: 12.5px; color: var(--texto-suave); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dia.pendente .dia-info { color: var(--pendente); font-weight: 600; }
+.dia.futuro { background: var(--cartao); }
+.dia.futuro:hover { background: var(--folga-fundo); filter: none; }
+.dia.conferido { background: var(--conferido-fundo); border-color: color-mix(in srgb, var(--conferido) 40%, var(--linha)); }
+.dia.conferido:hover { background: var(--conferido-fundo); }
+.dia.conferido .dia-info { color: var(--conferido); font-weight: 600; }
+.dia.nao_util { background: var(--folga-fundo); }
+.dia.nao_util:hover { background: var(--folga-fundo); }
+.dia.hoje { outline: 2px solid var(--acento); outline-offset: -2px; }
+.dia-irr { position: absolute; top: 7px; right: 7px; }
+
+.janela { border: 1px solid var(--linha); border-radius: var(--raio); background: var(--cartao); color: var(--texto); padding: 22px 24px; width: min(440px, 92vw); }
+.janela::backdrop { background: #0007; }
+.janela h2 { font-size: 18px; }
+.janela h2::first-letter { text-transform: uppercase; }
+.janela fieldset { border: 0; padding: 0; margin: 16px 0 12px; }
+.janela legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
+.opcao { display: flex; align-items: center; gap: 9px; padding: 6px 0; cursor: pointer; }
+.campo { display: block; font-weight: 600; }
+.campo input { display: block; width: 100%; margin-top: 6px; font-weight: 400; }
+.campo[hidden] { display: none; }
+.erro-form { color: var(--erro); min-height: 1.4em; margin: 10px 0 0; font-weight: 600; }
+.botoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+
+@media (max-width: 860px) {
+  .calendario { padding: 10px; gap: 4px; }
+  .dia { min-height: 62px; padding: 6px; }
+  .dia-info { font-size: 11px; }
+}
+
+/* Etapa 3: irregularidades */
+input[type=date], textarea {
+  font: inherit; color: var(--texto); background: var(--cartao);
+  border: 1px solid var(--linha); border-radius: var(--raio); padding: 8px 10px; min-height: 38px;
+}
+textarea { resize: vertical; width: 100%; }
+.barra label { display: flex; align-items: center; gap: 6px; }
+.abas { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.aba {
+  background: var(--cartao); color: var(--texto); border: 1px solid var(--linha);
+  font-weight: 500; font-size: 13.5px; padding: 6px 12px; min-height: 36px;
+}
+.aba:hover { background: var(--folga-fundo); }
+.aba.ativa { background: var(--acento); border-color: var(--acento); color: #fff; font-weight: 650; }
+.aba.ativa:hover { background: var(--acento-escuro); }
+.aba .selo { margin-left: 4px; padding: 0 7px; font-size: 12px; }
+.rolagem { overflow-x: auto; }
+td.obs { color: var(--texto-suave); max-width: 340px; overflow-wrap: anywhere; }
+th.acoes-col { text-align: right; }
+td.acoes { white-space: nowrap; text-align: right; }
+button.mini { padding: 3px 10px; min-height: 30px; font-size: 13.5px; }
+button.perigo { color: var(--erro); border-color: var(--erro); }
+button.perigo:hover { background: color-mix(in srgb, var(--erro) 12%, transparent); }
+.janela.larga { width: min(560px, 94vw); max-height: 92vh; overflow-y: auto; }
+.grade-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.grade-campos .campo:first-child { grid-column: 1 / -1; }
+.grade-campos select, .grade-campos input { width: 100%; margin-top: 6px; font-weight: 400; }
+.janela .campo select { display: block; }
+.janela fieldset { margin-top: 14px; }
+.janela .botoes { flex-wrap: wrap; }
+@media (max-width: 860px) { .grade-campos { grid-template-columns: 1fr; } }
+
+/* Etapa 4: pesquisa e relatórios */
+.busca-grande { display: flex; flex-direction: column; align-items: stretch !important; gap: 6px !important; font-weight: 600; width: min(460px, 100%); }
+.busca-grande input { font-size: 18px; min-height: 46px; font-weight: 400; }
+.contagem { margin: 0 0 12px; }
+.ocorrencia { padding: 16px 18px; margin-bottom: 14px; }
+.ocorrencia-cab { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.boleta-num { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ocorrencia-dados { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 20px; margin: 12px 0; }
+.ocorrencia-dados dt { font-size: 12.5px; color: var(--texto-suave); }
+.ocorrencia-dados dd { margin: 0; font-weight: 600; }
+.lista-irr { margin: 0; padding-left: 20px; }
+.lista-irr li { padding: 2px 0; }
+.ocorrencia-links { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--linha); }
+.ocorrencia-links a { color: var(--acento); font-weight: 600; text-decoration: none; }
+.ocorrencia-links a:hover { text-decoration: underline; }
+.espaco-topo { margin-top: 22px; }
+.matriz th.cat-cab { min-width: 92px; max-width: 120px; font-size: 12px; vertical-align: bottom; line-height: 1.25; }
+.matriz th, .matriz td { padding: 9px 10px; }
+.matriz tbody td:first-child, .matriz tfoot td:first-child { white-space: nowrap; }
+tfoot td { font-weight: 700; border-top: 2px solid var(--linha); background: color-mix(in srgb, var(--papel) 60%, var(--cartao)); }
+.barras { padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 10px; }
+.barra-linha { display: grid; grid-template-columns: minmax(150px, 280px) 1fr 48px; align-items: center; gap: 12px; }
+.barra-nome { font-size: 14px; }
+.barra-trilho { height: 14px; background: var(--folga-fundo); border-radius: 99px; overflow: hidden; }
+.barra-valor { display: block; height: 100%; background: var(--acento); border-radius: 99px; }
+.barra-num { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.titulo-impressao { margin: -8px 0 16px; }
+@media (max-width: 860px) { .barra-linha { grid-template-columns: 1fr 44px; } .barra-trilho { grid-column: 1 / -1; grid-row: 2; } }
+@media print {
+  .lateral, .topo, .nao-imprimir, .avisos, .ocorrencia-links { display: none !important; }
+  body { display: block; background: #fff; color: #000; }
+  main { padding: 0; max-width: none; }
+  .painel, .indicador { break-inside: avoid; }
+  .rolagem { overflow: visible; }
+  .matriz th, .matriz td { padding: 4px 5px; font-size: 11px; }
+}
+
+  </style>
+</head>
+<body>
+  <aside class="lateral" id="lateral">
+    <div class="marca">
+      <span class="marca-sigla">SHOP15</span>
+      <span class="marca-nome">Conferência de orçamentos</span>
+    </div>
+    <nav class="menu" id="menu">
+      <a href="#/inicio" data-rota="inicio">Início</a>
+      <a href="#/conferencias" data-rota="conferencias">Conferências</a>
+      <a href="#/irregularidades" data-rota="irregularidades">Irregularidades</a>
+      <a href="#/pesquisa" data-rota="pesquisa">Pesquisa</a>
+      <a href="#/relatorios" data-rota="relatorios">Relatórios</a>
+    </nav>
+    <div class="lateral-rodape" id="status-servidor">Conectando…</div>
+  </aside>
+
+  <div class="conteudo">
+    <header class="topo">
+      <button class="btn-menu" id="btn-menu" aria-label="Abrir menu">Menu</button>
+      <h1 id="titulo-pagina">Início</h1>
+    </header>
+    <main id="app" tabindex="-1"></main>
+  </div>
+
+  <div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+
+  <script>
+/* Cliente da API. Todos os dados vêm do servidor (banco de dados compartilhado). */
+const api = {
+  async chamar(metodo, url, corpo) {
+    let resp;
+    try {
+      resp = await fetch(url, {
+        method: metodo,
+        headers: corpo ? { "Content-Type": "application/json" } : {},
+        body: corpo ? JSON.stringify(corpo) : undefined,
+      });
+    } catch (e) {
+      throw new Error("Sem conexão com o servidor. Verifique se ele está ligado.");
+    }
+    const dados = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(dados.erro || "Não foi possível concluir a operação.");
+    return dados;
+  },
+  get: (url) => api.chamar("GET", url),
+  post: (url, corpo) => api.chamar("POST", url, corpo),
+  put: (url, corpo) => api.chamar("PUT", url, corpo),
+  del: (url) => api.chamar("DELETE", url),
+  // Baixa um arquivo gerado pelo servidor (ex.: planilha Excel)
+  async baixar(url) {
+    let resp;
+    try {
+      resp = await fetch(url);
+    } catch (e) {
+      throw new Error("Sem conexão com o servidor. Verifique se ele está ligado.");
+    }
+    if (!resp.ok) {
+      const dados = await resp.json().catch(() => ({}));
+      throw new Error(dados.erro || "Não foi possível gerar a planilha.");
+    }
+    const m = /filename="([^"]+)"/.exec(resp.headers.get("Content-Disposition") || "");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(await resp.blob());
+    a.download = m ? m[1] : "exportacao.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  },
+};
+
+
+/* Utilitários de interface */
+const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+               "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+function esc(t) {
+  return String(t ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function aviso(msg, tipo = "") {
+  const el = document.createElement("div");
+  el.className = "aviso " + tipo;
+  el.textContent = msg;
+  document.getElementById("avisos").appendChild(el);
+  setTimeout(() => el.remove(), tipo === "erro" ? 6000 : 3500);
+}
+
+function opcoesMeses(selecionado) {
+  return MESES.map((m, i) => `<option value="${i + 1}" ${i + 1 === selecionado ? "selected" : ""}>${m}</option>`).join("");
+}
+
+function opcoesAnos(selecionado) {
+  const atual = new Date().getFullYear();
+  let h = "";
+  for (let a = atual + 1; a >= atual - 6; a--) h += `<option ${a === selecionado ? "selected" : ""}>${a}</option>`;
+  return h;
+}
+
+
+/* Início: resumo das conferências do mês */
+async function paginaInicio(app) {
+  const hoje = new Date();
+  let ano = hoje.getFullYear(), mes = hoje.getMonth() + 1;
+
+  async function carregar() {
+    const r = await api.get(`/api/resumo?ano=${ano}&mes=${mes}`);
+    const totConf = r.filiais.reduce((s, f) => s + f.conferidos, 0);
+    const totIrr = r.filiais.reduce((s, f) => s + f.irregularidades, 0);
+    const iniciadas = r.filiais.filter((f) => f.conferidos > 0).length;
+
+    app.querySelector("#resumo").innerHTML = `
+      <div class="indicador"><div class="valor">${r.filiais.length}</div><div class="rotulo">Filiais ativas</div></div>
+      <div class="indicador ok"><div class="valor">${totConf}</div><div class="rotulo">Dias conferidos no mês</div></div>
+      <div class="indicador"><div class="valor">${iniciadas}</div><div class="rotulo">Filiais com conferência iniciada</div></div>
+      <div class="indicador ${totIrr ? "alerta" : ""}"><div class="valor">${totIrr}</div><div class="rotulo">Irregularidades registradas</div></div>`;
+
+    app.querySelector("#tabela").innerHTML = r.filiais.map((f) => `
+      <tr>
+        <td><a href="#/conferencias?filial=${f.id}">${esc(f.nome)}</a></td>
+        <td class="num ${f.conferidos ? "" : "zero"}">${f.conferidos}</td>
+        <td class="num ${f.nao_uteis ? "" : "zero"}">${f.nao_uteis}</td>
+        <td class="num">${f.irregularidades ? `<span class="selo erro">${f.irregularidades}</span>` : '<span class="zero">0</span>'}</td>
+      </tr>`).join("");
+  }
+
+  app.innerHTML = `
+    <div class="barra">
+      <label>Mês <select id="f-mes">${opcoesMeses(mes)}</select></label>
+      <label>Ano <select id="f-ano">${opcoesAnos(ano)}</select></label>
+    </div>
+    <div class="resumo" id="resumo"></div>
+    <section class="painel">
+      <div class="painel-titulo">Situação por filial <small>Dados do mês selecionado</small></div>
+      <table>
+        <thead><tr><th>Filial</th><th class="num">Dias conferidos</th><th class="num">Domingos/feriados</th><th class="num">Irregularidades</th></tr></thead>
+        <tbody id="tabela"></tbody>
+      </table>
+    </section>`;
+
+  app.querySelector("#f-mes").onchange = (e) => { mes = +e.target.value; carregar(); };
+  app.querySelector("#f-ano").onchange = (e) => { ano = +e.target.value; carregar(); };
+  await carregar();
+}
+
+
+/* Conferências: calendário mensal por filial */
+let _ultimoResponsavel = "";
+
+const SITUACAO_ROTULO = { pendente: "Pendente", conferido: "Conferido", nao_util: "Domingo/feriado" };
+const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const DIAS_SEMANA_LONGO = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+
+function dataIsoHoje() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function dataExtenso(iso) {
+  const [a, m, d] = iso.split("-").map(Number);
+  const dt = new Date(a, m - 1, d);
+  return `${DIAS_SEMANA_LONGO[dt.getDay()]}, ${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${a}`;
+}
+
+async function paginaConferencias(app) {
+  const hoje = new Date();
+  const hojeIso = dataIsoHoje();
+  const q = new URLSearchParams(location.hash.split("?")[1] || "");
+  const filiais = await api.get("/api/filiais");
+  if (!filiais.length) {
+    app.innerHTML = `<div class="painel"><div class="vazio"><strong>Nenhuma filial ativa</strong></div></div>`;
+    return;
+  }
+  let filialId = +q.get("filial") || filiais[0].id;
+  if (!filiais.some((f) => f.id === filialId)) filialId = filiais[0].id;
+  let ano = +q.get("ano") || hoje.getFullYear();
+  let mes = +q.get("mes") || hoje.getMonth() + 1;
+  let dados = null;
+
+  app.innerHTML = `
+    <div class="barra">
+      <label>Filial <select id="f-filial">${filiais.map((f) =>
+        `<option value="${f.id}" ${f.id === filialId ? "selected" : ""}>${esc(f.nome)}</option>`).join("")}</select></label>
+      <button class="sec" id="mes-ant" aria-label="Mês anterior">‹</button>
+      <label>Mês <select id="f-mes">${opcoesMeses(mes)}</select></label>
+      <label>Ano <select id="f-ano">${opcoesAnos(ano)}</select></label>
+      <button class="sec" id="mes-prox" aria-label="Próximo mês">›</button>
+      <span class="espaco"></span>
+      <button class="sec" id="btn-excel">Exportar mês (Excel)</button>
+      <button class="sec" id="btn-domingos">Marcar domingos</button>
+    </div>
+    <div class="resumo" id="resumo"></div>
+    <section class="painel">
+      <div class="painel-titulo">Calendário <small id="legenda"></small></div>
+      <div class="calendario" id="calendario"></div>
+    </section>
+    <datalist id="lista-resp"></datalist>`;
+
+  const $ = (s) => app.querySelector(s);
+
+  async function carregar() {
+    dados = await api.get(`/api/conferencias?filial=${filialId}&ano=${ano}&mes=${mes}`);
+    history.replaceState(null, "", `#/conferencias?filial=${filialId}&ano=${ano}&mes=${mes}`);
+    desenhar();
+  }
+
+  function desenhar() {
+    const dias = dados.dias;
+    const conf = dias.filter((d) => d.situacao === "conferido").length;
+    const nu = dias.filter((d) => d.situacao === "nao_util").length;
+    const pend = dias.filter((d) => d.situacao === "pendente" && d.data <= hojeIso).length;
+    const irr = dias.reduce((s, d) => s + d.irregularidades, 0);
+    $("#resumo").innerHTML = `
+      <div class="indicador ok"><div class="valor">${conf}</div><div class="rotulo">Dias conferidos</div></div>
+      <div class="indicador ${pend ? "pend" : ""}"><div class="valor">${pend}</div><div class="rotulo">Dias pendentes até hoje</div></div>
+      <div class="indicador"><div class="valor">${nu}</div><div class="rotulo">Domingos/feriados</div></div>
+      <div class="indicador ${irr ? "alerta" : ""}"><div class="valor">${irr}</div><div class="rotulo">Irregularidades no mês</div></div>`;
+    $("#legenda").textContent = `${dados.filial.nome} · ${MESES[mes - 1]} de ${ano}`;
+
+    const primeiro = new Date(ano, mes - 1, 1).getDay();
+    let h = DIAS_SEMANA.map((n) => `<div class="cab-dia">${n}</div>`).join("");
+    h += '<div class="dia fora"></div>'.repeat(primeiro);
+    h += dias.map((d) => {
+      const n = +d.data.slice(8);
+      const futuro = d.data > hojeIso;
+      const detalhe = d.situacao === "conferido" ? esc(d.responsavel)
+        : d.situacao === "nao_util" ? "Não útil" : (futuro ? "" : "Pendente");
+      const rotulo = `${dataExtenso(d.data)}: ${SITUACAO_ROTULO[d.situacao]}` +
+        (d.responsavel ? `, responsável ${d.responsavel}` : "") +
+        (d.irregularidades ? `, ${d.irregularidades} irregularidade(s)` : "");
+      return `<button type="button" class="dia ${d.situacao} ${d.data === hojeIso ? "hoje" : ""} ${futuro ? "futuro" : ""}"
+          data-data="${d.data}" aria-label="${esc(rotulo)}">
+        <span class="dia-num">${n}</span>
+        <span class="dia-info">${detalhe}</span>
+        ${d.irregularidades ? `<span class="selo erro dia-irr">${d.irregularidades}</span>` : ""}
+      </button>`;
+    }).join("");
+    $("#calendario").innerHTML = h;
+    app.querySelectorAll(".dia[data-data]").forEach((b) => (b.onclick = () => abrirDia(b.dataset.data)));
+  }
+
+  async function abrirDia(data) {
+    const d = dados.dias.find((x) => x.data === data);
+    const futuro = data > hojeIso;
+    let sugestoes = [];
+    try { sugestoes = await api.get("/api/responsaveis"); } catch { /* sugestões são opcionais */ }
+    $("#lista-resp").innerHTML = sugestoes.map((r) => `<option value="${esc(r)}">`).join("");
+
+    const dlg = document.createElement("dialog");
+    dlg.className = "janela";
+    dlg.innerHTML = `
+      <form method="dialog" id="form-dia">
+        <h2>${esc(dataExtenso(data))}</h2>
+        <p class="suave">${esc(dados.filial.nome)}</p>
+        <fieldset>
+          <legend>Situação do dia</legend>
+          <label class="opcao"><input type="radio" name="sit" value="conferido" ${futuro ? "disabled" : ""}> Conferido</label>
+          <label class="opcao"><input type="radio" name="sit" value="nao_util"> Domingo/feriado (não útil)</label>
+          <label class="opcao"><input type="radio" name="sit" value="pendente"> Pendente${d.situacao !== "pendente" ? " (reabrir)" : ""}</label>
+        </fieldset>
+        <label id="campo-resp" class="campo">Responsável pela conferência
+          <input type="text" id="resp" list="lista-resp" maxlength="80" autocomplete="off">
+        </label>
+        ${d.irregularidades ? `<p class="suave">Este dia tem ${d.irregularidades} irregularidade(s) registrada(s).</p>` : ""}
+        ${d.concluido_em ? `<p class="suave">Conferido em ${esc(d.concluido_em)}</p>` : ""}
+        <p class="erro-form" id="erro-dia" role="alert"></p>
+        <div class="botoes">
+          <button type="button" class="sec" id="cancelar">Cancelar</button>
+          <button type="submit" id="salvar">Salvar</button>
+        </div>
+      </form>`;
+    document.body.appendChild(dlg);
+    const radios = dlg.querySelectorAll('input[name="sit"]');
+    const resp = dlg.querySelector("#resp");
+    const marcado = d.situacao === "pendente" && !futuro ? "conferido" : (d.situacao === "pendente" ? "nao_util" : d.situacao);
+    radios.forEach((r) => (r.checked = r.value === marcado));
+    resp.value = d.responsavel || _ultimoResponsavel;
+    const situacaoAtual = () => dlg.querySelector('input[name="sit"]:checked')?.value;
+    const atualizarCampo = () => { dlg.querySelector("#campo-resp").hidden = situacaoAtual() !== "conferido"; };
+    radios.forEach((r) => (r.onchange = atualizarCampo));
+    atualizarCampo();
+
+    const fechar = () => { dlg.close(); dlg.remove(); };
+    dlg.querySelector("#cancelar").onclick = fechar;
+    dlg.addEventListener("cancel", (e) => { e.preventDefault(); fechar(); });
+    dlg.querySelector("#form-dia").onsubmit = async (e) => {
+      e.preventDefault();
+      const sit = situacaoAtual();
+      const erro = dlg.querySelector("#erro-dia");
+      erro.textContent = "";
+      if (sit === "conferido" && !resp.value.trim()) {
+        erro.textContent = "Informe o responsável pela conferência.";
+        resp.focus();
+        return;
+      }
+      const btn = dlg.querySelector("#salvar");
+      btn.disabled = true;
+      try {
+        await api.put("/api/conferencias", { filial_id: filialId, data, situacao: sit, responsavel: resp.value });
+        if (sit === "conferido") _ultimoResponsavel = resp.value.trim();
+        fechar();
+        aviso("Dia atualizado.");
+        await carregar();
+      } catch (err) {
+        erro.textContent = err.message;
+        btn.disabled = false;
+      }
+    };
+    dlg.showModal();
+    (marcado === "conferido" ? resp : radios[0]).focus();
+  }
+
+  $("#f-filial").onchange = (e) => { filialId = +e.target.value; carregar().catch((x) => aviso(x.message, "erro")); };
+  const mudarPeriodo = () => {
+    $("#f-mes").value = mes; $("#f-ano").value = ano;
+    carregar().catch((x) => aviso(x.message, "erro"));
+  };
+  $("#f-mes").onchange = (e) => { mes = +e.target.value; mudarPeriodo(); };
+  $("#f-ano").onchange = (e) => { ano = +e.target.value; mudarPeriodo(); };
+  const limites = [hoje.getFullYear() - 6, hoje.getFullYear() + 1];
+  function deslocar(delta) {
+    let m = mes + delta, a = ano;
+    if (m < 1) { m = 12; a--; } else if (m > 12) { m = 1; a++; }
+    if (a < limites[0] || a > limites[1]) return;
+    mes = m; ano = a; mudarPeriodo();
+  }
+  $("#mes-ant").onclick = () => deslocar(-1);
+  $("#mes-prox").onclick = () => deslocar(1);
+  $("#btn-excel").onclick = () =>
+    api.baixar(`/exportar/conferencias?ano=${ano}&mes=${mes}`).catch((e) => aviso(e.message, "erro"));
+  $("#btn-domingos").onclick = async () => {
+    if (!confirm(`Marcar como "Domingo/feriado" todos os domingos ainda pendentes de ${MESES[mes - 1]} de ${ano} em ${dados.filial.nome}?`)) return;
+    try {
+      const r = await api.post("/api/conferencias/domingos", { filial_id: filialId, ano, mes });
+      aviso(r.marcados ? `${r.marcados} domingo(s) marcado(s).` : "Nenhum domingo pendente neste mês.");
+      await carregar();
+    } catch (err) { aviso(err.message, "erro"); }
+  };
+
+  await carregar();
+}
+
+
+/* Irregularidades: uma aba por categoria, cadastro por boleta, edição e exclusão */
+let _ultimaFilialIrr = 0;
+let _ultimaDataIrr = "";
+
+function dataBr(iso) {
+  return `${iso.slice(8)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
+}
+
+async function paginaIrregularidades(app) {
+  const hoje = new Date();
+  const hojeIso = dataIsoHoje();
+  const q = new URLSearchParams(location.hash.split("?")[1] || "");
+  const [filiais, categorias] = await Promise.all([api.get("/api/filiais"), api.get("/api/categorias")]);
+
+  let filialId = +q.get("filial") || 0;          // 0 = todas as filiais
+  let ano = +q.get("ano") || hoje.getFullYear();
+  let mes = q.has("mes") ? +q.get("mes") : hoje.getMonth() + 1;   // 0 = o ano todo
+  let catId = +q.get("categoria") || 0;          // 0 = todas as categorias
+  let busca = q.get("busca") || "";
+  let dados = null;
+  let pedido = 0;
+
+  app.innerHTML = `
+    <div class="barra">
+      <label>Filial <select id="f-filial">
+        <option value="0">Todas as filiais</option>
+        ${filiais.map((f) => `<option value="${f.id}" ${f.id === filialId ? "selected" : ""}>${esc(f.nome)}</option>`).join("")}
+      </select></label>
+      <label>Mês <select id="f-mes"><option value="0" ${mes === 0 ? "selected" : ""}>Ano todo</option>${opcoesMeses(mes)}</select></label>
+      <label>Ano <select id="f-ano">${opcoesAnos(ano)}</select></label>
+      <label>Boleta <input type="text" id="f-busca" maxlength="30" placeholder="Buscar nº" autocomplete="off" value="${esc(busca)}"></label>
+      <span class="espaco"></span>
+      <button class="sec" id="btn-excel">Exportar Excel</button>
+      <button id="btn-nova">Nova boleta</button>
+    </div>
+    <div class="abas" role="tablist" id="abas" aria-label="Categorias de irregularidade"></div>
+    <section class="painel">
+      <div class="painel-titulo"><span id="titulo-lista">Registros</span><small id="legenda"></small></div>
+      <div class="rolagem" id="lista"></div>
+    </section>`;
+
+  const $ = (s) => app.querySelector(s);
+
+  async function carregar() {
+    const meu = ++pedido;
+    const p = new URLSearchParams({ ano, mes });
+    if (filialId) p.set("filial", filialId);
+    if (catId) p.set("categoria", catId);
+    if (busca.trim()) p.set("busca", busca.trim());
+    const r = await api.get(`/api/irregularidades?${p}`);
+    if (meu !== pedido) return;            // resposta antiga: já houve uma consulta mais recente
+    dados = r;
+    const h = new URLSearchParams({ ano, mes });
+    if (filialId) h.set("filial", filialId);
+    if (catId) h.set("categoria", catId);
+    if (busca.trim()) h.set("busca", busca.trim());
+    history.replaceState(null, "", `#/irregularidades?${h}`);
+    desenhar();
+  }
+  const recarregar = () => carregar().catch((e) => aviso(e.message, "erro"));
+
+  function desenhar() {
+    const totalGeral = Object.values(dados.por_categoria).reduce((a, b) => a + b, 0);
+    const aba = (id, nome, n) => `<button type="button" role="tab" class="aba ${id === catId ? "ativa" : ""}"
+        aria-selected="${id === catId}" data-cat="${id}">${esc(nome)} <span class="selo ${n ? "erro" : ""}">${n}</span></button>`;
+    $("#abas").innerHTML = aba(0, "Todas", totalGeral) +
+      categorias.map((c) => aba(c.id, c.nome, dados.por_categoria[c.id] || 0)).join("");
+    app.querySelectorAll(".aba").forEach((b) => (b.onclick = () => { catId = +b.dataset.cat; recarregar(); }));
+
+    const cat = categorias.find((c) => c.id === catId);
+    $("#titulo-lista").textContent = cat ? cat.nome : "Todas as irregularidades";
+    $("#legenda").textContent = `${dados.total} registro(s)` +
+      (dados.total > dados.itens.length ? ` · mostrando os ${dados.itens.length} mais recentes` : "") +
+      ` · ${mes ? MESES[mes - 1] + " de " : ""}${ano}`;
+
+    if (!dados.itens.length) {
+      $("#lista").innerHTML = `<div class="vazio"><strong>Nenhuma irregularidade encontrada</strong>
+        ${busca.trim() ? "Nenhuma boleta corresponde à busca neste período." : "Não há registros com os filtros selecionados."}</div>`;
+      return;
+    }
+    $("#lista").innerHTML = `<table>
+      <thead><tr><th>Data</th><th>Filial</th><th>Boleta</th>${cat ? "" : "<th>Irregularidade</th>"}<th>Observação</th><th class="acoes-col">Ações</th></tr></thead>
+      <tbody>${dados.itens.map((i) => `<tr>
+        <td>${dataBr(i.data)}</td>
+        <td>${esc(i.filial)}</td>
+        <td><strong>${esc(i.boleta)}</strong></td>
+        ${cat ? "" : `<td>${esc(i.categoria)}</td>`}
+        <td class="obs">${esc(i.observacao)}</td>
+        <td class="acoes">
+          <button type="button" class="sec mini" data-editar="${i.id}" aria-label="Editar boleta ${esc(i.boleta)}, ${esc(i.categoria)}">Editar</button>
+          <button type="button" class="sec mini perigo" data-excluir="${i.id}" aria-label="Excluir boleta ${esc(i.boleta)}, ${esc(i.categoria)}">Excluir</button>
+        </td></tr>`).join("")}</tbody></table>`;
+    app.querySelectorAll("[data-editar]").forEach((b) => (b.onclick = () => abrirFormulario(dados.itens.find((x) => x.id === +b.dataset.editar))));
+    app.querySelectorAll("[data-excluir]").forEach((b) => (b.onclick = () => excluir(dados.itens.find((x) => x.id === +b.dataset.excluir))));
+  }
+
+  async function excluir(i) {
+    if (!confirm(`Excluir esta irregularidade?\n\nBoleta ${i.boleta} · ${i.categoria}\n${i.filial} · ${dataBr(i.data)}`)) return;
+    try {
+      await api.del(`/api/irregularidades?id=${i.id}`);
+      aviso("Irregularidade excluída.");
+      await carregar();
+    } catch (err) { aviso(err.message, "erro"); carregar().catch(() => {}); }
+  }
+
+  /* Formulário único: novo (item = null, várias categorias) ou edição (uma categoria) */
+  function abrirFormulario(item) {
+    const edicao = !!item;
+    const filialInicial = edicao ? item.filial_id : (_ultimaFilialIrr || filialId || filiais[0].id);
+    const dataInicial = edicao ? item.data : (_ultimaDataIrr || hojeIso);
+    const dlg = document.createElement("dialog");
+    dlg.className = "janela larga";
+    dlg.innerHTML = `
+      <form method="dialog" id="form-irr" novalidate>
+        <h2>${edicao ? "Editar irregularidade" : "Nova boleta com irregularidade"}</h2>
+        <div class="grade-campos">
+          <label class="campo">Filial
+            <select id="i-filial">${filiais.map((f) => `<option value="${f.id}" ${f.id === filialInicial ? "selected" : ""}>${esc(f.nome)}</option>`).join("")}</select>
+          </label>
+          <label class="campo">Data da conferência
+            <input type="date" id="i-data" value="${dataInicial}" max="${hojeIso}" min="2000-01-01">
+          </label>
+          <label class="campo">Número da boleta
+            <input type="text" id="i-boleta" maxlength="30" autocomplete="off" value="${esc(edicao ? item.boleta : "")}">
+          </label>
+        </div>
+        <fieldset>
+          <legend>${edicao ? "Irregularidade" : "Irregularidades encontradas (marque uma ou mais)"}</legend>
+          ${categorias.map((c) => `<label class="opcao"><input type="${edicao ? "radio" : "checkbox"}" name="cat" value="${c.id}"
+              ${(edicao ? item.categoria_id === c.id : catId === c.id) ? "checked" : ""}> ${esc(c.nome)}</label>`).join("")}
+        </fieldset>
+        <label class="campo">Observação (opcional)
+          <textarea id="i-obs" rows="2" maxlength="300">${esc(edicao ? item.observacao : "")}</textarea>
+        </label>
+        <p class="erro-form" id="erro-irr" role="alert"></p>
+        <div class="botoes">
+          <button type="button" class="sec" id="cancelar">${edicao ? "Cancelar" : "Fechar"}</button>
+          ${edicao ? "" : '<button type="submit" class="sec" value="nova" id="salvar-nova">Salvar e cadastrar outra</button>'}
+          <button type="submit" value="fechar" id="salvar">Salvar</button>
+        </div>
+      </form>`;
+    document.body.appendChild(dlg);
+    const f = (s) => dlg.querySelector(s);
+    const fechar = () => { dlg.close(); dlg.remove(); };
+    f("#cancelar").onclick = fechar;
+    dlg.addEventListener("cancel", (e) => { e.preventDefault(); fechar(); });
+
+    f("#form-irr").onsubmit = async (e) => {
+      e.preventDefault();
+      const manter = e.submitter?.value === "nova";
+      const erro = f("#erro-irr");
+      erro.textContent = "";
+      const marcadas = [...dlg.querySelectorAll('input[name="cat"]:checked')].map((x) => +x.value);
+      if (!f("#i-boleta").value.trim()) { erro.textContent = "Informe o número da boleta."; f("#i-boleta").focus(); return; }
+      if (!f("#i-data").value) { erro.textContent = "Informe a data."; f("#i-data").focus(); return; }
+      if (!marcadas.length) { erro.textContent = "Marque ao menos uma irregularidade."; return; }
+      const base = { filial_id: +f("#i-filial").value, data: f("#i-data").value, boleta: f("#i-boleta").value, observacao: f("#i-obs").value };
+      dlg.querySelectorAll("button[type=submit]").forEach((b) => (b.disabled = true));
+      try {
+        if (edicao) {
+          await api.put("/api/irregularidades", { ...base, id: item.id, categoria_id: marcadas[0] });
+          aviso("Irregularidade atualizada.");
+        } else {
+          const r = await api.post("/api/irregularidades", { ...base, categorias: marcadas });
+          _ultimaFilialIrr = base.filial_id; _ultimaDataIrr = base.data;
+          aviso(`Boleta ${base.boleta.trim()}: ${r.criadas.length} irregularidade(s) registrada(s).` +
+                (r.repetidas.length ? ` ${r.repetidas.length} já existia(m).` : ""));
+        }
+        await carregar();
+        if (manter) {
+          f("#i-boleta").value = ""; f("#i-obs").value = "";
+          dlg.querySelectorAll('input[name="cat"]').forEach((x) => (x.checked = +x.value === catId));
+          dlg.querySelectorAll("button[type=submit]").forEach((b) => (b.disabled = false));
+          f("#i-boleta").focus();
+        } else fechar();
+      } catch (err) {
+        erro.textContent = err.message;
+        dlg.querySelectorAll("button[type=submit]").forEach((b) => (b.disabled = false));
+      }
+    };
+    dlg.showModal();
+    f("#i-boleta").focus();
+  }
+
+  $("#f-filial").onchange = (e) => { filialId = +e.target.value; recarregar(); };
+  $("#f-mes").onchange = (e) => { mes = +e.target.value; recarregar(); };
+  $("#f-ano").onchange = (e) => { ano = +e.target.value; recarregar(); };
+  let espera;
+  $("#f-busca").oninput = (e) => { busca = e.target.value; clearTimeout(espera); espera = setTimeout(recarregar, 300); };
+  $("#btn-nova").onclick = () => abrirFormulario(null);
+  $("#btn-excel").onclick = () => {
+    const p = new URLSearchParams({ ano, mes });
+    if (filialId) p.set("filial", filialId);
+    if (catId) p.set("categoria", catId);
+    if (busca.trim()) p.set("busca", busca.trim());
+    api.baixar(`/exportar/irregularidades?${p}`).catch((e) => aviso(e.message, "erro"));
+  };
+
+  await carregar();
+}
+
+
+/* Pesquisa global: encontra uma boleta em qualquer filial/dia e mostra todas as suas irregularidades */
+async function paginaPesquisa(app) {
+  const q = new URLSearchParams(location.hash.split("?")[1] || "");
+  let termo = q.get("q") || "";
+  let pedido = 0;
+  let espera;
+
+  app.innerHTML = `
+    <div class="barra">
+      <label class="busca-grande">Número da boleta
+        <input type="text" id="p-busca" maxlength="30" autocomplete="off" placeholder="Digite o número (ou parte dele)" value="${esc(termo)}">
+      </label>
+    </div>
+    <div id="p-resultado" aria-live="polite"></div>`;
+  const $ = (s) => app.querySelector(s);
+  const campo = $("#p-busca");
+
+  function aguardando() {
+    $("#p-resultado").innerHTML = `<section class="painel"><div class="vazio"><strong>Pesquise uma boleta</strong>
+      Mostra a filial, a data e todas as irregularidades registradas para ela, em qualquer mês.</div></section>`;
+  }
+
+  async function buscar() {
+    const t = campo.value.trim();
+    termo = t;
+    history.replaceState(null, "", t ? `#/pesquisa?q=${encodeURIComponent(t)}` : "#/pesquisa");
+    if (!t) { pedido++; aguardando(); return; }
+    const meu = ++pedido;
+    let r;
+    try { r = await api.get(`/api/pesquisa?q=${encodeURIComponent(t)}`); }
+    catch (e) { if (meu === pedido) $("#p-resultado").innerHTML = `<div class="erro-form">${esc(e.message)}</div>`; return; }
+    if (meu !== pedido) return;
+
+    if (!r.total) {
+      $("#p-resultado").innerHTML = `<section class="painel"><div class="vazio"><strong>Boleta não encontrada</strong>
+        Nenhuma irregularidade registrada para “${esc(r.termo)}”.</div></section>`;
+      return;
+    }
+    const cartoes = r.resultados.map((g) => {
+      const mes = +g.data.slice(5, 7), ano = +g.data.slice(0, 4);
+      return `<article class="painel ocorrencia">
+        <div class="ocorrencia-cab">
+          <div><span class="boleta-num">${esc(g.boleta)}</span>${g.exata ? "" : ' <span class="suave">(contém o número buscado)</span>'}</div>
+          <span class="selo erro">${g.irregularidades.length} irregularidade(s)</span>
+        </div>
+        <dl class="ocorrencia-dados">
+          <div><dt>Filial</dt><dd>${esc(g.filial)}</dd></div>
+          <div><dt>Data</dt><dd>${dataBr(g.data)}</dd></div>
+          <div><dt>Conferência do dia</dt><dd>${esc(SITUACAO_ROTULO[g.situacao] || g.situacao)}</dd></div>
+        </dl>
+        <ul class="lista-irr">${g.irregularidades.map((i) => `<li><strong>${esc(i.categoria)}</strong>${i.observacao ? `<span class="suave"> — ${esc(i.observacao)}</span>` : ""}</li>`).join("")}</ul>
+        <div class="ocorrencia-links">
+          <a href="#/irregularidades?filial=${g.filial_id}&ano=${ano}&mes=${mes}&busca=${encodeURIComponent(g.boleta)}">Editar nas irregularidades</a>
+          <a href="#/conferencias?filial=${g.filial_id}&ano=${ano}&mes=${mes}">Ver calendário do mês</a>
+        </div>
+      </article>`;
+    }).join("");
+    $("#p-resultado").innerHTML = `<p class="suave contagem">${r.total} ocorrência(s) encontrada(s)` +
+      (r.total > r.resultados.length ? ` · mostrando as ${r.resultados.length} primeiras; refine o número` : "") + `</p>${cartoes}`;
+  }
+
+  campo.oninput = () => { clearTimeout(espera); espera = setTimeout(buscar, 300); };
+  campo.onkeydown = (e) => { if (e.key === "Enter") { clearTimeout(espera); buscar(); } };
+  if (termo) await buscar(); else aguardando();
+  campo.focus();
+}
+
+
+/* Relatórios: totais, filial x categoria e resumos por período */
+async function paginaRelatorios(app) {
+  const hoje = new Date();
+  const q = new URLSearchParams(location.hash.split("?")[1] || "");
+  const [filiais, categorias] = await Promise.all([api.get("/api/filiais"), api.get("/api/categorias")]);
+  let ano = +q.get("ano") || hoje.getFullYear();
+  let mes = q.has("mes") ? +q.get("mes") : hoje.getMonth() + 1;   // 0 = ano todo
+  let filialId = +q.get("filial") || 0;
+  let catId = +q.get("categoria") || 0;
+  let pedido = 0;
+
+  app.innerHTML = `
+    <div class="barra nao-imprimir">
+      <label>Mês <select id="r-mes"><option value="0" ${mes === 0 ? "selected" : ""}>Ano todo</option>${opcoesMeses(mes)}</select></label>
+      <label>Ano <select id="r-ano">${opcoesAnos(ano)}</select></label>
+      <label>Filial <select id="r-filial"><option value="0">Todas as filiais</option>
+        ${filiais.map((f) => `<option value="${f.id}" ${f.id === filialId ? "selected" : ""}>${esc(f.nome)}</option>`).join("")}</select></label>
+      <label>Categoria <select id="r-cat"><option value="0">Todas as categorias</option>
+        ${categorias.map((c) => `<option value="${c.id}" ${c.id === catId ? "selected" : ""}>${esc(c.nome)}</option>`).join("")}</select></label>
+      <span class="espaco"></span>
+      <button class="sec" id="r-excel">Exportar Excel</button>
+      <button class="sec" id="r-imprimir">Imprimir</button>
+    </div>
+    <p class="suave titulo-impressao" id="r-legenda"></p>
+    <div id="r-corpo"></div>`;
+  const $ = (s) => app.querySelector(s);
+  const n = (v) => (v ? v : `<span class="zero">0</span>`);
+
+  function filtrosUrl() {
+    const p = new URLSearchParams({ ano, mes });
+    if (filialId) p.set("filial", filialId);
+    if (catId) p.set("categoria", catId);
+    return p;
+  }
+
+  async function carregar() {
+    const meu = ++pedido;
+    const r = await api.get(`/api/relatorio?${filtrosUrl()}`);
+    if (meu !== pedido) return;
+    history.replaceState(null, "", `#/relatorios?${filtrosUrl()}`);
+    desenhar(r);
+  }
+  const recarregar = () => carregar().catch((e) => aviso(e.message, "erro"));
+
+  function desenhar(r) {
+    const t = r.totais;
+    const periodo = `${mes ? MESES[mes - 1] + " de " : "Ano de "}${ano}`;
+    const escopo = [filialId ? filiais.find((f) => f.id === filialId)?.nome : "Todas as filiais",
+                    catId ? categorias.find((c) => c.id === catId)?.nome : "Todas as categorias"].join(" · ");
+    $("#r-legenda").textContent = `${periodo} · ${escopo}`;
+
+    const cats = catId ? r.categorias.filter((c) => c.id === catId) : r.categorias;
+    const totCat = Object.fromEntries(r.por_categoria.map((c) => [c.id, c.total]));
+    const maior = Math.max(1, ...r.por_categoria.map((c) => c.total));
+    const linkFilial = (f) => `#/irregularidades?filial=${f.id}&ano=${ano}&mes=${mes}${catId ? `&categoria=${catId}` : ""}`;
+
+    $("#r-corpo").innerHTML = `
+      <div class="resumo">
+        <div class="indicador ${t.irregularidades ? "alerta" : ""}"><div class="valor">${t.irregularidades}</div><div class="rotulo">Irregularidades</div></div>
+        <div class="indicador"><div class="valor">${t.boletas}</div><div class="rotulo">Boletas com irregularidade</div></div>
+        <div class="indicador"><div class="valor">${t.filiais_com_irregularidade}</div><div class="rotulo">Filiais com irregularidade</div></div>
+        <div class="indicador ok"><div class="valor">${t.conferidos}</div><div class="rotulo">Dias conferidos</div></div>
+      </div>
+
+      <section class="painel">
+        <div class="painel-titulo">Irregularidades por filial e categoria <small>${esc(periodo)}</small></div>
+        <div class="rolagem"><table class="matriz">
+          <thead><tr><th>Filial</th>${cats.map((c) => `<th class="num cat-cab">${esc(c.nome)}</th>`).join("")}
+            <th class="num">Total</th><th class="num">Boletas</th><th class="num">Dias conferidos</th></tr></thead>
+          <tbody>${r.por_filial.map((f) => `<tr>
+            <td><a href="${linkFilial(f)}">${esc(f.nome)}</a></td>
+            ${cats.map((c) => `<td class="num">${n(f.categorias[c.id])}</td>`).join("")}
+            <td class="num"><strong>${n(f.irregularidades)}</strong></td>
+            <td class="num">${n(f.boletas)}</td>
+            <td class="num">${n(f.conferidos)}</td></tr>`).join("")}</tbody>
+          <tfoot><tr><td>Total</td>${cats.map((c) => `<td class="num">${totCat[c.id] || 0}</td>`).join("")}
+            <td class="num">${t.irregularidades}</td><td class="num">${t.boletas}</td><td class="num">${t.conferidos}</td></tr></tfoot>
+        </table></div>
+      </section>
+
+      <section class="painel espaco-topo">
+        <div class="painel-titulo">Resumo por categoria <small>${esc(escopo)}</small></div>
+        <div class="barras">${r.por_categoria.map((c) => `
+          <div class="barra-linha"><span class="barra-nome">${esc(c.nome)}</span>
+            <span class="barra-trilho"><span class="barra-valor" style="width:${(c.total / maior) * 100}%"></span></span>
+            <span class="barra-num">${c.total}</span></div>`).join("")}</div>
+      </section>
+
+      ${r.por_mes.length ? `<section class="painel espaco-topo">
+        <div class="painel-titulo">Evolução mensal <small>${ano}</small></div>
+        <div class="rolagem"><table>
+          <thead><tr><th>Mês</th><th class="num">Irregularidades</th><th class="num">Boletas</th></tr></thead>
+          <tbody>${r.por_mes.map((m) => `<tr><td>${MESES[m.mes - 1]}</td><td class="num">${n(m.irregularidades)}</td><td class="num">${n(m.boletas)}</td></tr>`).join("")}</tbody>
+        </table></div></section>` : ""}`;
+  }
+
+  $("#r-mes").onchange = (e) => { mes = +e.target.value; recarregar(); };
+  $("#r-ano").onchange = (e) => { ano = +e.target.value; recarregar(); };
+  $("#r-filial").onchange = (e) => { filialId = +e.target.value; recarregar(); };
+  $("#r-cat").onchange = (e) => { catId = +e.target.value; recarregar(); };
+  $("#r-imprimir").onclick = () => window.print();
+  $("#r-excel").onclick = () => api.baixar(`/exportar/relatorio?${filtrosUrl()}`).catch((e) => aviso(e.message, "erro"));
+  await carregar();
+}
+
+
+/* Roteador simples baseado em hash (#/inicio, #/conferencias ...) */
+const ROTAS = {
+  inicio: { titulo: "Início", fn: paginaInicio },
+  conferencias: { titulo: "Conferências", fn: paginaConferencias },
+  irregularidades: { titulo: "Irregularidades", fn: paginaIrregularidades },
+  pesquisa: { titulo: "Pesquisa", fn: paginaPesquisa },
+  relatorios: { titulo: "Relatórios", fn: paginaRelatorios },
+};
+
+async function navegar() {
+  const caminho = (location.hash.replace(/^#\/?/, "") || "inicio").split("?")[0];
+  const nome = ROTAS[caminho] ? caminho : "inicio";
+  const rota = ROTAS[nome];
+  document.getElementById("titulo-pagina").textContent = rota.titulo;
+  document.title = rota.titulo + " · Conferência de Orçamentos";
+  document.querySelectorAll("#menu a").forEach((a) => a.classList.toggle("ativo", a.dataset.rota === nome));
+  document.getElementById("lateral").classList.remove("aberta");
+  const app = document.getElementById("app");
+  try {
+    await rota.fn(app);
+  } catch (e) {
+    app.innerHTML = `<div class="painel"><div class="vazio"><strong>Não foi possível carregar esta área</strong>${esc(e.message)}</div></div>`;
+  }
+}
+
+async function verificarServidor() {
+  const el = document.getElementById("status-servidor");
+  try {
+    await api.get("/api/saude");
+    el.textContent = "Servidor conectado"; el.className = "lateral-rodape on";
+  } catch {
+    el.textContent = "Servidor indisponível"; el.className = "lateral-rodape off";
+  }
+}
+
+document.getElementById("btn-menu").onclick = () => document.getElementById("lateral").classList.toggle("aberta");
+window.addEventListener("hashchange", navegar);
+navegar();
+verificarServidor();
+setInterval(verificarServidor, 20000);
+
+  </script>
+</body>
+</html>

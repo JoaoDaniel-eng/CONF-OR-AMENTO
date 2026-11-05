@@ -1,32 +1,19 @@
-# Conferência de Orçamentos
+# Conferência de Orçamentos — Render (até 6 arquivos)
 
-Sistema web para substituir a planilha Excel de conferência mensal de orçamentos (17 filiais SHOP15).
+Pacote compacto com 4 arquivos. Não exige Node.js, npm nem banco de dados externo.
 
-## Como executar
-1. Instale o **Python 3.9+** em UM computador (o servidor). Não há mais nada para instalar.
-2. Dê duplo clique em `iniciar.bat` (Windows) ou execute `./iniciar.sh` (Linux/Mac).
-3. Neste computador acesse `http://localhost:8080`. Nos demais computadores da rede, use o endereço
-   "Outros computadores" mostrado na janela do servidor. Todos compartilham o mesmo banco.
+## Configuração no Render
+- **Runtime:** Python 3
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `python app.py`
 
-## Banco de dados
-SQLite (relacional) em `data/conferencias.db`, com chaves estrangeiras, restrições e modo WAL (vários usuários simultâneos).
-**Backup:** basta copiar a pasta `data/` com o servidor parado (ou a qualquer momento: o WAL é seguro).
-Deixe o servidor sempre ligado em um computador fixo.
+O servidor lê automaticamente a variável `PORT` fornecida pelo Render e escuta em `0.0.0.0`.
 
-## Estrutura
-- `backend/` servidor, API (`routes.py`), banco (`db.py`, `schema.sql`)
-- `frontend/` interface (HTML/CSS/JS, sem dependências externas)
-- `data/` banco de dados (criado automaticamente)
+## Arquivos
+- `app.py`: servidor HTTP, rotas, regras, banco SQLite local e exportações.
+- `index.html`: interface completa.
+- `requirements.txt`: sem dependências externas (somente biblioteca padrão do Python).
+- `README.md`: instruções.
 
-## Andamento
-- [x] Etapa 1 — Estrutura, interface e banco de dados
-- [x] Etapa 2 — Filiais e controle mensal de conferências
-- [x] Etapa 3 — Irregularidades
-- [x] Etapa 4 — Pesquisa global e relatórios
-- [x] Etapa 5a — Exportação Excel (botões "Exportar Excel" em Conferências, Irregularidades e Relatórios; arquivo .xlsx gerado pelo servidor, sem instalar nada)
-- [x] Etapa 5b — Testes automatizados básicos de API e exportações Excel
-
-## Testes
-Execute na pasta do projeto: `python -m unittest discover -s tests -v`.
-Os testes usam banco temporário e não alteram `data/conferencias.db`.
-A validação visual nos navegadores e o teste em rede local devem ser feitos no ambiente de implantação.
+## Dados
+O SQLite é criado automaticamente em `data/conferencias.db`. Isso não é uma conexão com banco externo. Em hospedagens como Render, o disco local pode ser temporário; para manter os registros entre reinicializações e novos deploys, configure um Persistent Disk e direcione `CONFERENCIA_DB` para um caminho dentro dele. Sem disco persistente, os dados podem ser perdidos em reinicializações ou deploys.
