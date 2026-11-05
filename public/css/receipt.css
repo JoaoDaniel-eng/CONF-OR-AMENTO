@@ -1,0 +1,23 @@
+/* Cupom do pedido para impressora térmica de 58 mm. Na tela fica escondido; só aparece ao imprimir. */
+#print-area { display: none; }
+@page { size: 58mm auto; margin: 0; }
+@media print {
+  html, body { background: #fff !important; color: #000 !important; margin: 0 !important; padding: 0 !important; }
+  body > *:not(#print-area) { display: none !important; }
+  #print-area { display: block !important; width: 48mm; margin: 0 auto; padding: 2mm 0 14mm; color: #000; background: #fff;
+    font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.25; font-weight: 600; }
+  #print-area * { color: #000 !important; background: #fff !important; box-sizing: border-box; }
+  #print-area .r-title { text-align: center; font-size: 17px; font-weight: 800; letter-spacing: .5px; }
+  #print-area .r-center { text-align: center; }
+  #print-area .r-code { text-align: center; font-size: 20px; font-weight: 800; margin: 2px 0; }
+  #print-area .r-small { font-size: 11px; font-weight: 500; }
+  #print-area .r-line { border: 0; border-top: 1px dashed #000; margin: 5px 0; height: 0; }
+  #print-area .r-block { margin: 3px 0; word-break: break-word; }
+  #print-area .r-label { font-size: 11px; font-weight: 800; text-transform: uppercase; }
+  #print-area .r-row { display: flex; justify-content: space-between; gap: 6px; }
+  #print-area .r-row span:last-child { white-space: nowrap; }
+  #print-area .r-item { font-weight: 800; margin-top: 4px; }
+  #print-area .r-opt { font-size: 11px; font-weight: 500; padding-left: 8px; word-break: break-word; }
+  #print-area .r-total { font-size: 16px; font-weight: 800; }
+  #print-area .r-box { border: 2px solid #000; padding: 3px 4px; text-align: center; font-weight: 800; margin: 4px 0; }
+}
