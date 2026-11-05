@@ -1,0 +1,1 @@
+O banco conferencias.db e criado aqui automaticamente na primeira execucao.
